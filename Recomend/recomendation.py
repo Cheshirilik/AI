@@ -16,15 +16,7 @@ critics=\
 
 # Составляем список фильмов для пары имен
 def get_pairs(obj, name1, name2):
-    res = []
-    for i in obj[name1]:
-        if i in obj[name2]:
-            res.append(i)
-
-    if res is []:
-        return 0
-    else:
-        return res
+    return [i for i in obj[name1] if i in obj[name2]]
 
 
 # Подобие способом евклидова расстояния
@@ -34,9 +26,7 @@ def get_euc_distance(obj, name1, name2):
     if mas is []:
         return 0
 
-    summa = 0
-    for i in mas:
-        summa += pow(obj[name1][i] - obj[name2][i], 2)
+    summa = sum([(obj[name1][i] - obj[name2][i])**2 for i in mas])
 
     # return 1 / (1 + summa)
     return 1/(1 + sqrt(summa))
@@ -47,8 +37,7 @@ def get_pears_distance(obj, name1, name2):
     mas = get_pairs(obj, name1, name2)
 
     n = len(mas)
-    if len == 0:
-        return 0
+    if n == 0: return 0
 
     sum1 = sum([obj[name1][i] for i in mas])
     sum2 = sum([obj[name2][i] for i in mas])
@@ -61,8 +50,7 @@ def get_pears_distance(obj, name1, name2):
     num = p_sum - sum1 * sum2 / n
     den = sqrt((sum1_sq - sum1**2/n) * (sum2_sq - sum2**2/n))
 
-    if den == 0:
-        return 0
+    if den == 0: return 0
 
     return num/den
 
@@ -81,15 +69,45 @@ def get_all(obj):
 
 
 # Поиск наиболее близких к name
-def get_top(obj, name, n=5, sim=get_pears_distance):
-    mas = [(sim(obj, name, other), other) for other in obj if other != name]
+def get_top(obj, name, n=5, func=get_pears_distance):
+    mas = [(func(obj, name, other), other) for other in obj if other != name]
 
     mas.sort()
     mas.reverse()
     return mas[0:n]
 
 
-##########################
+# Рекомендация для конкретного человека, на основе средних оценок других
+def get_recommendations(obj, name, func=get_pears_distance):
+    total = {}
+    sim_sum = {}
+
+    for i in obj:                                       # Перебираем имена в словаре
+        if i == name:
+            continue
+        sim = func(obj, name, i)                       # Вычисляем подобие между заданным человеком и очередным критиком
+
+        if sim <= 0:
+            continue
+
+        for j in obj[i]:                                # Перебираем фильмы
+
+            if j not in obj[name] or obj[name][j] == 0:  # выбираем только те фильмы, которые человек ещё не смотрел
+                total.setdefault(j, 0)
+                total[j] += obj[i][j] * sim             # суммарная оценка * коэф. подобия
+
+                sim_sum.setdefault(j, 0)
+                sim_sum[j] += sim                       # сумма коэф. подобия
+
+    rankings = [(n, s/sim_sum[n]) for n, s in total.items()]
+
+    rankings.sort()
+    rankings.reverse()
+
+    return rankings
+
+
+############## MAIN ############
 res_e, res_p = get_all(critics)
 res_e = sorted(res_e, key=lambda x: x[1])                                   # сортируем по второму столбцу (подобию)
 res_p = sorted(res_p, key=lambda x: x[1])
@@ -102,20 +120,20 @@ for i in range(0, l):
             p = res_p[j][1]
             break
 
-    print("{0:<30} euclid = {1:<8.5f} pearson = {2:<.5f}".format(res_e[i][0], res_e[i][1], p))
+    print("{0:<30} e = {1:<8.5f} p = {2:<.5f}".format(res_e[i][0], res_e[i][1], p))
     # печатаем все пары, где    {<8.5f}  = <8 - выравнивание по правой стороне до восьми символов
     #                                    = .5f - показать пять знаков после запятой
 
 l -= 1                                                                       # находим наиболее и наименее похожие пары
-print("\n\nLess similar euclid pair: {0}, distance is {1}: \
-      \nMore similar uclid pair: {2}, distance is {3}: \
+print("\n\nLess similar euclid pair: {0}, distance is {1}:\nMore similar uclid pair: {2}, distance is {3}: \
       ".format(res_e[0][0], res_e[0][1], res_e[l][0], res_e[l][1]))
 
-print("\nLess similar pearson pair: {0}, distance is {1}: \
-      \nMore similar pearson pair: {2}, distance is {3}: \
+print("\nLess similar pearson pair: {0}, distance is {1}:\nMore similar pearson pair: {2}, distance is {3}: \
       ".format(res_p[0][0], res_p[0][1], res_p[l][0], res_p[l][1]))
 
 name = "Toby"
-res = get_top(critics, name, n=3)
-print(res)
+print(get_top(critics, name, n=3))
+
+print("\nRecomendations")
+print(get_recommendations(critics, 'Toby'))
 
