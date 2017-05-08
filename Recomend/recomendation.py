@@ -80,6 +80,16 @@ def get_all(obj):
     return res, res1                # Евклид, Пирсон
 
 
+# Поиск наиболее близких к name
+def get_top(obj, name, n=5, sim=get_pears_distance):
+    mas = [(sim(obj, name, other), other) for other in obj if other != name]
+
+    mas.sort()
+    mas.reverse()
+    return mas[0:n]
+
+
+##########################
 res_e, res_p = get_all(critics)
 res_e = sorted(res_e, key=lambda x: x[1])                                   # сортируем по второму столбцу (подобию)
 res_p = sorted(res_p, key=lambda x: x[1])
@@ -104,3 +114,8 @@ print("\n\nLess similar euclid pair: {0}, distance is {1}: \
 print("\nLess similar pearson pair: {0}, distance is {1}: \
       \nMore similar pearson pair: {2}, distance is {3}: \
       ".format(res_p[0][0], res_p[0][1], res_p[l][0], res_p[l][1]))
+
+name = "Toby"
+res = get_top(critics, name, n=3)
+print(res)
+
