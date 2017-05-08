@@ -77,7 +77,8 @@ def get_top(obj, name, n=5, func=get_pears_distance):
     return mas[0:n]
 
 
-# Рекомендация для конкретного человека, на основе средних оценок других
+# Расчет оценок фильмов ещё не просмотренных человеком, на основе оценок критиков
+# На основании подобия человека и критика рассчитывается оценка, которую поставит человек ещё не просмотренному фильму
 def get_recommendations(obj, name, func=get_pears_distance):
     total = {}
     sim_sum = {}
@@ -134,6 +135,7 @@ print("\nLess similar pearson pair: {0}, distance is {1}:\nMore similar pearson 
 name = "Toby"
 print(get_top(critics, name, n=3))
 
-print("\nRecomendations")
+print("\nPaerson recomendations:")
 print(get_recommendations(critics, 'Toby'))
-
+print("\nEuclid recomendations:")
+print(get_recommendations(critics, 'Toby', func=get_euc_distance))
