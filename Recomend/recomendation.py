@@ -81,21 +81,26 @@ def get_all(obj):
 
 
 res_e, res_p = get_all(critics)
-res_e = sorted(res_e, key=lambda x: x[1])                                   # сортируем по третьему столбцу (подобию)
+res_e = sorted(res_e, key=lambda x: x[1])                                   # сортируем по второму столбцу (подобию)
 res_p = sorted(res_p, key=lambda x: x[1])
 
-for i in range(0, len(res_e)):
-    print("{0}, euclid = {1}:".format(res_e[i][0], res_e[i][1]))            # печатаем все пары евклида
+l = len(res_e)
+p = ""
+for i in range(0, l):
+    for j in range(0, l):
+        if res_p[j][0] == res_e[i][0]:
+            p = res_p[j][1]
+            break
 
-print("\n")
-for i in range(0, len(res_p)):
-    print("{0}, pirson = {1}:".format(res_p[i][0], res_p[i][1]))            # печатаем все пары Пирсона
+    print("{0:<30} euclid = {1:<8.5f} pearson = {2:<.5f}".format(res_e[i][0], res_e[i][1], p))
+    # печатаем все пары, где    {<8.5f}  = <8 - выравнивание по правой стороне до восьми символов
+    #                                    = .5f - показать пять знаков после запятой
 
-l = len(res_e) - 1                                                          # находим наиболее и наименее похожие пары
+l -= 1                                                                       # находим наиболее и наименее похожие пары
 print("\n\nLess similar euclid pair: {0}, distance is {1}: \
       \nMore similar uclid pair: {2}, distance is {3}: \
       ".format(res_e[0][0], res_e[0][1], res_e[l][0], res_e[l][1]))
 
-print("\nLess similar pirson pair: {0}, distance is {1}: \
-      \nMore similar pirson pair: {2}, distance is {3}: \
+print("\nLess similar pearson pair: {0}, distance is {1}: \
+      \nMore similar pearson pair: {2}, distance is {3}: \
       ".format(res_p[0][0], res_p[0][1], res_p[l][0], res_p[l][1]))
