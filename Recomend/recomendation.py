@@ -62,17 +62,31 @@ def get_pears_distance(obj, name1, name2):
     return num/den
 
 
-# Подобие для всех пар в словаре (евклид и пирсон)
+# Подобие с использовнаием коэф Танимото
+def get_tan_distance(obj, name1, name2):
+    mas = get_pairs(obj, name1, name2)
+
+    n_a = sum([obj[name1][i] for i in mas])**2              # S(a)**2
+    n_b = sum([obj[name2][i] for i in mas])**2              # S(b)**2
+    n_c = sum([obj[name1][i] * obj[name2][i] for i in mas]) # S(a*b)
+
+    return n_c/(n_a + n_b - n_c)
+
+
+# Подобие для всех пар в словаре
 def get_all(obj):
     temp = combinations(obj.keys(), 2)
 
     res = []
     res1 = []
-    for j in temp:
-        res.append([j[0] + '-' + j[1], get_euc_distance(obj, j[0], j[1])])
-        res1.append([j[0] + '-' + j[1], get_pears_distance(obj, j[0], j[1])])
+    res2 = []
+    for i in temp:
+        pair = i[0] + '-' + i[1]
+        res.append([pair, get_euc_distance(obj, i[0], i[1])])
+        res1.append([pair, get_pears_distance(obj, i[0], i[1])])
+        res2.append([pair, get_tan_distance(obj, i[0], i[1])])
 
-    return res, res1                # Евклид, Пирсон
+    return res, res1, res2                # Евклид, Пирсон, Танимото
 
 
 # Поиск наиболее близких к name
@@ -127,39 +141,53 @@ def transform_dict(obj):
 
 
 #================== MAIN ==================
-res_e, res_p = get_all(critics)
+res_e, res_p, res_t = get_all(critics)
 res_e = sorted(res_e, key=lambda x: x[1])                                   # сортируем по второму столбцу (подобию)
 res_p = sorted(res_p, key=lambda x: x[1])
+res_t = sorted(res_t, key=lambda x: x[1])
 
 l = len(res_e)
 p = ""
+t = ""
 for i in range(0, l):
     for j in range(0, l):
         if res_p[j][0] == res_e[i][0]:
             p = res_p[j][1]
             break
 
-    print("{0:<30} e = {1:<8.5f} p = {2:<.5f}".format(res_e[i][0], res_e[i][1], p))
+    for k in range(0, l):
+        if res_t[k][0] == res_e[i][0]:
+            t = res_t[k][1]
+            break
+
+    print("{0:<30} e = {1:<8.5f} p = {2:<8.5f} t = {3:<8.5f}".format(res_e[i][0], res_e[i][1], p, t))
     # печатаем все пары, где    {<8.5f}  = <8 - выравнивание по правой стороне до восьми символов
     #                                    = .5f - показать пять знаков после запятой
 
 l -= 1                                                                       # находим наиболее и наименее похожие пары
-print("\n\nLess similar euclid pair: {0}, distance is {1}:\nMore similar uclid pair: {2}, distance is {3}: \
+print("\nEuclid:\nless similar pair: {0}, coef is {1}:\nMore similar pair: {2}, coef is {3}: \
       ".format(res_e[0][0], res_e[0][1], res_e[l][0], res_e[l][1]))
 
-print("\nLess similar pearson pair: {0}, distance is {1}:\nMore similar pearson pair: {2}, distance is {3}: \
+print("\nPearson:\nless similar pair: {0}, coef is {1}:\nMore similar pair: {2}, coef is {3}: \
       ".format(res_p[0][0], res_p[0][1], res_p[l][0], res_p[l][1]))
 
-name = "Toby"
-print(get_top(critics, name, n=3))
+print("\nTanimoto:\nless similar pair: {0}, coef is {1}:\nMore similar pair: {2}, coef is {3}: \
+      ".format(res_t[0][0], res_t[0][1], res_t[l][0], res_t[l][1]))
 
-print("\nPaerson recomendations:")
-print(get_recommendations(critics, 'Toby'))
-print("\nEuclid recomendations:")
+print("\nTop critics:")
+print(get_top(critics, "Toby", n=3))
+
+print("\nEuclid recommendations:")
 print(get_recommendations(critics, 'Toby', func=get_euc_distance))
+print("\nPearson recommendations:")
+print(get_recommendations(critics, 'Toby'))
+print("\nTanimoto recommendations:")
+print(get_recommendations(critics, 'Toby', func=get_tan_distance))
 
 #print("\n\nTransformation:")
 #transform_dict(critics)
 
-print("\nFilm(Superman Returns) recomendations:")
-print(get_top(films, "Superman Returns"))
+print("\nFilm (Superman Returns) recomendations:")
+print("Euclid:\n", get_top(films, "Superman Returns", func=get_euc_distance))
+print("Pearson:\n", get_top(films, "Superman Returns"))
+print("Tanimoto:\n", get_top(films, "Superman Returns", func=get_tan_distance))
