@@ -63,11 +63,12 @@ def get_pears_distance(obj, name1, name2):
 
 
 # Подобие с использовнаием коэф Танимото
+# https://jcheminf.springeropen.com/articles/10.1186/s13321-015-0069-3
 def get_tan_distance(obj, name1, name2):
     mas = get_pairs(obj, name1, name2)
 
-    n_a = sum([obj[name1][i] for i in mas])**2              # S(a)**2
-    n_b = sum([obj[name2][i] for i in mas])**2              # S(b)**2
+    n_a = sum([obj[name1][i]**2 for i in mas])              # S(a)**2
+    n_b = sum([obj[name2][i]**2 for i in mas])              # S(b)**2
     n_c = sum([obj[name1][i] * obj[name2][i] for i in mas]) # S(a*b)
 
     return n_c/(n_a + n_b - n_c)
