@@ -160,3 +160,6 @@ print(get_recommendations(critics, 'Toby', func=get_euc_distance))
 
 #print("\n\nTransformation:")
 #transform_dict(critics)
+
+print("\nFilm(Superman Returns) recomendations:")
+print(get_top(films, "Superman Returns"))
