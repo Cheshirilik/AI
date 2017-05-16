@@ -88,22 +88,23 @@ def build_clusters(table, dist=pearson):
 
 def print_cluster(clust, labels=None, n=0):
     for i in range(n):
-        print(' ')
-        if clust.id < 0:
-            print('-')
-        else:
-            if labels is None:
-                print(clust.id)
-            else:
-                print(labels[clust.id])
+        print(' ', end='')
 
-        if clust.left is not None:
-            print_cluster(clust.left, labels=labels, n=n+1)
-        if clust.right is not None:
-            print_cluster(clust.right, labels=labels, n=n+1)
+    if clust.id < 0:
+        print('-')
+    else:
+        if labels is None:
+            print(clust.id)
+        else:
+            print(labels[clust.id])
+
+    if clust.left is not None:
+        print_cluster(clust.left, labels=labels, n=n+1)
+    if clust.right is not None:
+        print_cluster(clust.right, labels=labels, n=n+1)
 
 # ================== MAIN ==================
 
 rows, cols, data = read_words('blogdata.txt')
 res = build_clusters(data)
-print_cluster(res, labels=rows)
+print_cluster(res, labels=rows, n=0)
