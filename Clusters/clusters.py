@@ -2,6 +2,7 @@
 
 from math import sqrt
 from pprint import pprint
+from PIL import Image,ImageDraw
 
 
 # Загрузка данных из файла
@@ -42,7 +43,7 @@ def pearson(name1, name2):
 
 # Кластер
 class BiCluster:
-    def __init__(self, vec, left = None, right = None, distance = 0.0, id = None):
+    def __init__(self, vec, left=None, right=None, distance=0.0, id=None):
         self.vec = vec
         self.left = left
         self.right = right
@@ -86,6 +87,7 @@ def build_clusters(table, dist=pearson):
     return clust[0]
 
 
+# Печатаем кластеры
 def print_cluster(clust, labels=None, n=0):
     for i in range(n):
         print(' ', end='')
@@ -103,8 +105,62 @@ def print_cluster(clust, labels=None, n=0):
     if clust.right is not None:
         print_cluster(clust.right, labels=labels, n=n+1)
 
-# ================== MAIN ==================
 
+# Вычисляем высоту сластеров для корректного отображения на графике
+def get_height(clust):
+    if (clust.left == None) and (clust.right == None):
+        return 1
+
+    return get_height(clust.left) + get_height(clust.right)
+
+
+# Вычисляем глубину сластера
+def get_depth(clust):
+    if (clust.left is None) and (clust.right is None):
+        return 0
+
+    return max(get_depth(clust.left), get_depth(clust.right)) + clust.distance
+
+
+# Рисуем узел
+def draw_node(draw, clust, x, y, scal, labels):
+    if clust.id < 0:
+        h1 = get_height(clust.left) * 20
+        h2 = get_height(clust.right) * 20
+
+        top = y - (h1 + h2) / 2
+        bottom = y + (h1 + h2) / 2
+
+        l = clust.distance * scal
+
+        draw.line((x, top + h1/2, x, bottom - h2/2), fill=(255, 0, 0))
+        draw.line((x, top + h1/2, x + l, top + h1/2), fill=(255, 0, 0))
+        draw.line((x, bottom - h2/2, x, bottom - h2/2), fill=(255, 0, 0))
+
+        draw_node(draw, clust.left, x + l, top + h1/2, scal, labels)
+        draw_node(draw, clust.right, x + l, bottom - h2/2, scal, labels)
+    else:
+        draw.text((x + 5, y - 7), labels[clust.id], (0, 0, 0))
+
+
+# Сохраняем кластер в *.jpg
+def draw_diag(clust, labels, jpg="cluster.jpg"):
+    h = get_height(clust) * 20
+    d = get_depth(clust)
+    w = 1200
+
+    scal = float(w - 150) / d
+
+    img = Image.new("RGB", (w, h), (255, 255, 255))
+    draw = ImageDraw.Draw(img)
+
+    draw.line((0, h/2, 10, h/2), fill = (255,0,0))
+    draw_node(draw, clust, 10, (h/2), scal, labels)
+    img.save(jpg, "JPEG")
+
+
+# ================== MAIN ==================
 rows, cols, data = read_words('blogdata.txt')
 res = build_clusters(data)
-print_cluster(res, labels=rows, n=0)
+print_cluster(res, labels=rows)
+draw_diag(res, rows)
