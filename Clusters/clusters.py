@@ -1,10 +1,8 @@
 # Кластеризация
 
 from math import sqrt
-from pprint import pprint
 from PIL import Image, ImageDraw
 import random
-import copy
 
 
 # Загрузка данных из файла
@@ -156,7 +154,7 @@ def draw_diag(clust, labels, jpg="cluster.jpg"):
     img = Image.new("RGB", (w, h), (255, 255, 255))
     draw = ImageDraw.Draw(img)
 
-    draw.line((0, h/2, 10, h/2), fill = (255,0,0))
+    draw.line((0, h/2, 10, h/2), fill=(255, 0, 0))
     draw_node(draw, clust, 10, (h/2), scal, labels)
     img.save(jpg, "JPEG")
 
@@ -196,25 +194,20 @@ def k_cluster(rows, dist=pearson, n=4):
 
             best_matches[best].append(j)
 
-            if best_matches == last_matches:
-                print(best_matches)
-                print("11111")
-                break
+        if best_matches == last_matches:
+            break
 
+        last_matches = best_matches
 
-            print("777777777777777777777777777777777777777777777777777777777777777")
-            #last_matches = copy.deepcopy(best_matches)
-            last_matches = best_matches
-
-            for i in range(n):
-                avgs = [0.0] * len(rows[0])
-                if len(best_matches[i]) > 0:
-                    for rowid in best_matches[i]:
-                        for m in range(len(rows[rowid])):
-                            avgs[m] += rows[rowid][m]
-                    for j in range(len(avgs)):
-                        avgs[j] /= len(best_matches[i])
-                    clusters[i] = avgs
+        for i in range(n):
+            avgs = [0.0] * len(rows[0])
+            if len(best_matches[i]) > 0:
+                for rowid in best_matches[i]:
+                    for m in range(len(rows[rowid])):
+                        avgs[m] += rows[rowid][m]
+                for j in range(len(avgs)):
+                    avgs[j] /= len(best_matches[i])
+                clusters[i] = avgs
 
     return best_matches
 
@@ -229,4 +222,7 @@ rows, cols, data = read_words('blogdata.txt')
 # draw_diag(res, cols, "rotate.jpg")
 
 res = k_cluster(data, n=10)
-print(res)
+#print(res)
+
+s = [[rows[i] for i in res[j]] for j in range(len(res))]
+print(s)
