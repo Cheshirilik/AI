@@ -20,7 +20,7 @@ def read_words(name):
     return rows, cols, data
 
 
-# Подобие корреляцией Пирсона
+# Вычисляем корреляцию Пирсона
 def pearson(name1, name2):
 
     sum1 = sum(name1)
@@ -39,6 +39,21 @@ def pearson(name1, name2):
         return 0
 
     return 1 - num/den      # Расстояние тем меньше, чем более схожи списки
+
+
+# Вычисление коэф. Танимото
+def tanimoto(name1, name2):
+    c1, c2, both = 0, 0, 0
+
+    for i in range(len(name1)):
+        if name1[i] != 0:
+            c1 += 1
+        if name2[i] != 0:
+            c2 += 1
+        if (name1[i] != 0) and (name2[i] != 0):
+            both += 1
+
+    return 1 - (float(both/(c1 + c2 - both)))
 
 
 # Кластер
@@ -180,6 +195,7 @@ def k_cluster(rows, dist=pearson, n=4):
                  for i in range(len(rows[0]))] for j in range(n)]
 
     last_matches = None
+    best_matches = None
     for k in range(100):
         print("Итерация {0}".format(k))
         best_matches = [[] for i in range(n)]
@@ -212,17 +228,21 @@ def k_cluster(rows, dist=pearson, n=4):
     return best_matches
 
 # ================== MAIN ==================
-rows, cols, data = read_words('blogdata.txt')
+# rows, cols, data = read_words('blogdata.txt')
+
+# Кластеризация
 # res = build_clusters(data)
-# # print_cluster(res, labels=rows)
 # draw_diag(res, rows)
 #
 # new = rotate(data)
 # res = build_clusters(data)
 # draw_diag(res, cols, "rotate.jpg")
 
-res = k_cluster(data, n=10)
-#print(res)
+# Кластеризация методом к-средних
+# res = k_cluster(data, n=10)
+# s = [[rows[i] for i in res[j]] for j in range(len(res))]
+# print(s)
 
-s = [[rows[i] for i in res[j]] for j in range(len(res))]
-print(s)
+wants, people, data = read_words('zebo.txt')
+res = build_clusters(data, dist=tanimoto)
+draw_diag(res, wants, "wants.jpg")
